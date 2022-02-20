@@ -123,7 +123,7 @@ order by date_time desc;
 |2015     |188  |
 +---------+-----+
 ```
-
+![iMessages I've Sent By Year](img/MessagesSentPerYear.png)
 #### Questions:
 
 1. What happened in 2017?
