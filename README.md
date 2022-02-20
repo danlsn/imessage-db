@@ -6,7 +6,7 @@ ___
 ## Step 1: Collect Messages Data
 
 Apple stores iMessage Data locally in an SQLite Database named 'chat.db'
-![Finder Window for Messages Database Folder](img/CleanShot 2022-02-20 at 20.55.01@2x.png)
+![Finder Window for Messages Database Folder](img/ScreenshotFinderWindow.png)
 ```bash
 --> ~ ls -lah /Users/danlsn/Library/Messages
 total 161064
