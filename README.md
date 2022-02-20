@@ -1,9 +1,13 @@
 # imessage-db
+
 _Learning more about SQL and SQLite by exploring my Apple Messages Data._
 ___
+
 ## Step 1: Collect Messages Data
-Apple stores iMessage Data locally in an SQLite Database named 'chat.db' 
+
+Apple stores iMessage Data locally in an SQLite Database named 'chat.db'
 ![Finder Window for Messages Database Folder](img/CleanShot 2022-02-20 at 20.55.01@2x.png)
+
 ```bash
 --> ~ ls -lah /Users/danlsn/Library/Messages
 total 161064
@@ -23,9 +27,13 @@ drwx------@  11 danlsn  staff   352B 19 Feb 15:48 StickerCache
 -rw-r--r--@   1 danlsn  staff    32K 20 Feb 17:44 prewarm.db-shm
 -rw-r--r--@   1 danlsn  staff   1.4M 20 Feb 17:44 prewarm.db-wal
 ```
+
 ___
+
 ## Step 2: Start Hacking on It
+
 ### 1. How many messages have I sent on iMessage?
+
 ```sqlite
 ---All Messages
 SELECT count(*) count
@@ -59,8 +67,11 @@ where message.is_from_me = 0;
 |26623|
 +-----+
 ```
+
 ### 2. How many messages have I sent per year?
+
 The date column in the 'messages' table is recorded as nanoseconds since 2001-01-01.
+
 ```sqlite
 --Select Messages I've Sent Grouped By Date
 select date(message.date / 1000000000 + strftime("%s", "2001-01-01"), "unixepoch", "localtime") date_time,
@@ -86,6 +97,7 @@ limit 10;
 |2018-10-02|150  |
 +----------+-----+
 ```
+
 > So far so good! Now it's time to bucket the dates by year instead!
 
 ```sqlite
@@ -111,14 +123,18 @@ order by date_time desc;
 |2015     |188  |
 +---------+-----+
 ```
+
 #### Questions:
+
 1. What happened in 2017?
-   1. Well, I had an Android Phone in 2017.
+    1. Well, I had an Android Phone in 2017.
 2. Why has iMessage usage dropped dramatically since 2020?
-   1. Most of my messaging happens on Messenger now
+    1. Most of my messaging happens on Messenger now
 3. And, 2015?
-   1. Back then most of my messaging was in WhatsApp!
+    1. Back then most of my messaging was in WhatsApp!
+
 ## 3. How Many iMessages are Sent vs. SMS?
+
 ```sqlite
 --Select Messages Sent by Me and Group By Type
 select count(*) count, message.service service
@@ -133,7 +149,9 @@ order by count desc;
 |5996 |SMS     |
 +-----+--------+
 ```
+
 ## 4. How Many Messages Sent in 'The Boys' Group Chat?
+
 ```sqlite
 --How Many Messages Sent in 'The Boys' Group Chat?
 
@@ -159,7 +177,9 @@ where chat_id = (select ROWID from chat where display_name like 'The Boys');
 |3      |3505 |
 +-------+-----+
 ```
+
 ## 5. How many messages grouped by group chat name?
+
 ```sqlite
 --Join Chat and Message Tables by chat_message_join, group by display_name
 select display_name, count(*) count
@@ -180,4 +200,40 @@ order by count desc;
 |Koala Kids                          |8    |
 +------------------------------------+-----+
 ```
+
+## 6. How much data has been sent in Attachments?
+
+```sqlite
+--How many total bytes of attachments?
+select str(sum(total_bytes)) total_bytes
+from attachment;
+
++-----------+
+|total_bytes|
++-----------+
+|9706223350 |
++-----------+
+
+--Bytes of Attachments Grouped By UTI
+select uti, sum(total_bytes) total_bytes
+from attachment
+group by uti
+order by total_bytes desc limit 10;
+
++---------------------------------------------+-----------+
+|uti                                          |total_bytes|
++---------------------------------------------+-----------+
+|com.apple.quicktime-movie                    |5112106511 |
+|public.jpeg                                  |2873301725 |
+|public.heic                                  |830067782  |
+|public.png                                   |255029744  |
+|public.mpeg-4                                |225392291  |
+|dyn.age81a5dzq7y066dbtf0g82peqf4hk2pdrb00n5xy|155572241  |
+|com.apple.m4v-video                          |113088672  |
+|com.adobe.raw-image                          |77530021   |
+|com.compuserve.gif                           |34474884   |
+|com.adobe.pdf                                |11116671   |
++---------------------------------------------+-----------+
+```
+
 ___
