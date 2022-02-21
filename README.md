@@ -40,35 +40,31 @@ SELECT count(*) count
 FROM main.message;
 ```
 
-+-----+
-|count|
-+-----+
-|48944|
-+-----+
+| count |
+| :--- |
+| 48944 |
 
 ```sqlite
 ---Sent By Me
 select count(*) count
 from main.message
 where message.is_from_me = 1;
+```
 
-+-----+
-|count|
-+-----+
-|22321|
-+-----+
+| count |
+| :--- |
+| 22321 |
 
----Received By Me
+```sqlite
+--Received By Me
 select count(*) count
 from main.message
 where message.is_from_me = 0;
-
-+-----+
-|count|
-+-----+
-|26623|
-+-----+
 ```
+
+| count |
+| :--- |
+| 26623 |
 
 ### 2. How many messages have I sent per year?
 
@@ -83,22 +79,20 @@ where message.is_from_me = 1
 group by date_time
 order by count desc
 limit 10;
-
-+----------+-----+
-|date_time |count|
-+----------+-----+
-|2018-09-21|282  |
-|2018-09-24|251  |
-|2022-01-03|227  |
-|2022-01-11|222  |
-|2018-09-22|180  |
-|2018-10-24|165  |
-|2018-12-20|164  |
-|2019-05-27|163  |
-|2019-09-21|152  |
-|2018-10-02|150  |
-+----------+-----+
 ```
+
+| date\_time | count |
+| :--- | :--- |
+| 2018-09-21 | 282 |
+| 2018-09-24 | 251 |
+| 2022-01-03 | 227 |
+| 2022-01-11 | 222 |
+| 2018-09-22 | 180 |
+| 2018-10-24 | 165 |
+| 2018-12-20 | 164 |
+| 2019-05-27 | 163 |
+| 2019-09-21 | 152 |
+| 2018-10-02 | 150 |
 
 > So far so good! Now it's time to bucket the dates by year instead!
 
@@ -111,20 +105,18 @@ from message
 where message.is_from_me = 1
 group by date_time
 order by date_time desc;
-
-+---------+-----+
-|date_time|count|
-+---------+-----+
-|2022     |1432 |
-|2021     |3033 |
-|2020     |3254 |
-|2019     |5918 |
-|2018     |6046 |
-|2017     |1    |
-|2016     |2449 |
-|2015     |188  |
-+---------+-----+
 ```
+
+| date\_time | count |
+| :--- | :--- |
+| 2022 | 1432 |
+| 2021 | 3033 |
+| 2020 | 3254 |
+| 2019 | 5918 |
+| 2018 | 6046 |
+| 2017 | 1 |
+| 2016 | 2449 |
+| 2015 | 188 |
 
 ![iMessages I've Sent By Year](img/MessagesSentPerYear.png)
 
@@ -143,16 +135,15 @@ order by date_time desc;
 --Select Messages Sent by Me and Group By Type
 select count(*) count, message.service service
 from message
+where message.is_from_me = 1
 group by service
 order by count desc;
-
-+-----+--------+
-|count|service |
-+-----+--------+
-|42948|iMessage|
-|5996 |SMS     |
-+-----+--------+
 ```
+
+| count | service |
+| :--- | :--- |
+| 20344 | iMessage |
+| 1977 | SMS |
 
 ## 4. How Many Messages Sent in 'The Boys' Group Chat?
 
@@ -163,24 +154,21 @@ order by count desc;
 select ROWID, display_name
 from chat
 where display_name like 'The Boys';
+```
 
-+-----+------------+
-|ROWID|display_name|
-+-----+------------+
-|3    |The Boys    |
-+-----+------------+
+| ROWID | display\_name |
+| :--- | :--- |
+| 3 | The Boys |
 
+```sqlite
 --Select Count of All Messages with the right chat_id
 select chat_id, count(*) count
 from chat_message_join
 where chat_id = (select ROWID from chat where display_name like 'The Boys');
-
-+-------+-----+
-|chat_id|count|
-+-------+-----+
-|3      |3505 |
-+-------+-----+
 ```
+| chat\_id | count |
+| :--- | :--- |
+| 3 | 3505 |
 
 ## 5. How many messages grouped by group chat name?
 
@@ -193,53 +181,46 @@ from chat
 where display_name not like ""
 group by display_name
 order by count desc;
-
-+------------------------------------+-----+
-|display_name                        |count|
-+------------------------------------+-----+
-|The Boys                            |3505 |
-|House Maxleigh ISO                  |306  |
-|Koala Kids - Photog & Cinematography|27   |
-|Koala Kids Dinner                   |13   |
-|Koala Kids                          |8    |
-+------------------------------------+-----+
 ```
+| display\_name | count |
+| :--- | :--- |
+| The Boys | 3505 |
+| House Maxleigh ISO | 306 |
+| Koala Kids - Photog & Cinematography | 27 |
+| Koala Kids Dinner | 13 |
+| Koala Kids | 8 |
 
 ## 6. How much data has been sent in Attachments?
 
 ```sqlite
 --How many total bytes of attachments?
-select str(sum(total_bytes)) total_bytes
+select sum(total_bytes) total_bytes
 from attachment;
+```
+| total\_bytes |
+| :--- |
+| 9706223350 |
 
-+-----------+
-|total_bytes|
-+-----------+
-|9706223350 |
-+-----------+
-
+```sqlite
 --Bytes of Attachments Grouped By UTI
 select uti, sum(total_bytes) total_bytes
 from attachment
 group by uti
 order by total_bytes desc
 limit 10;
-
-+---------------------------------------------+-----------+
-|uti                                          |total_bytes|
-+---------------------------------------------+-----------+
-|com.apple.quicktime-movie                    |5112106511 |
-|public.jpeg                                  |2873301725 |
-|public.heic                                  |830067782  |
-|public.png                                   |255029744  |
-|public.mpeg-4                                |225392291  |
-|dyn.age81a5dzq7y066dbtf0g82peqf4hk2pdrb00n5xy|155572241  |
-|com.apple.m4v-video                          |113088672  |
-|com.adobe.raw-image                          |77530021   |
-|com.compuserve.gif                           |34474884   |
-|com.adobe.pdf                                |11116671   |
-+---------------------------------------------+-----------+
 ```
+| uti | total\_bytes |
+| :--- | :--- |
+| com.apple.quicktime-movie | 5112106511 |
+| public.jpeg | 2873301725 |
+| public.heic | 830067782 |
+| public.png | 255029744 |
+| public.mpeg-4 | 225392291 |
+| dyn.age81a5dzq7y066dbtf0g82peqf4hk2pdrb00n5xy | 155572241 |
+| com.apple.m4v-video | 113088672 |
+| com.adobe.raw-image | 77530021 |
+| com.compuserve.gif | 34474884 |
+| com.adobe.pdf | 11116671 |
 
 ## 7. Who have I sent and received the most messages from?
 
@@ -264,17 +245,14 @@ where m.is_from_me = 1
 group by handle_id
 order by count desc
 limit 5;
-
-+-----+------------+
-|count|handle_id   |
-+-----+------------+
-|976  |+61403xxxxxx|
-|362  |+61425xxxxxx|
-|113  |+61417xxxxxx|
-|57   |+61425xxxxxx|
-|37   |+61403xxxxxx|
-+-----+------------+
 ```
+| count | handle\_id |
+| :--- | :--- |
+| 976 | +61403 xxx xxx |
+| 362 | +61425 xxx xxx |
+| 113 | +61417 xxx xxx |
+| 57 | +61425 xxx xxx |
+| 37 | +61403 xxx xxx |
 
 ## 9. How Many Missed Call Messages Have I Received?
 
@@ -284,34 +262,27 @@ select m.ROWID id, m.text text, m.date datetime
 from message m
 where m.text like 'You missed a call from%'
 limit 1;
+```
 
-+--+-------------------------------------------------------------------+------------------+
-|id|text                                                               |datetime          |
-+--+-------------------------------------------------------------------+------------------+
-|13|You missed a call from 0409xxxxxx, who did not leave a message.    |658219105684039936|
-|  |This message was provided by Telstra at no charge to you.          |                  |
-+--+-------------------------------------------------------------------+------------------+
+| id | text | datetime |
+| :--- | :--- | :--- |
+| 13 | You missed a call from 0409 xxx xxx, who did not leave a message. This message was provided by Telstra at no charge to you. | 658219105684039936 |
 
+```sqlite
 --How do I miss the most calls from?
 select h.id handle, count(*) count
 from message m
-        cross join handle h on h.ROWID = m.handle_id
+         cross join handle h on h.ROWID = m.handle_id
 where m.text like 'You missed a call from%'
   and handle not like 'message2txt'
 group by handle
 order by count desc
 limit 5;
-
-+------------+-----+
-|handle      |count|
-+------------+-----+
-|+61403xxxxxx|84   |
-|+61409xxxxxx|44   |
-|+61447xxxxxx|15   |
-|+61425xxxxxx|12   |
-|+61420xxxxxx|7    |
-+------------+-----+
-
 ```
-
-___
+| handle | count |
+| :--- | :--- |
+| +61403 xxx xxx | 84 |
+| +61409 xxx xxx | 44 |
+| +61447 xxx xxx | 15 |
+| +61425 xxx xxx | 12 |
+| +61420 xxx xxx | 7 |
