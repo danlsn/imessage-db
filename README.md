@@ -244,8 +244,34 @@ limit 10;
 ```sqlite
 --Select Messages Grouped by Handle
 select *
-from chat c cross join chat_handle_join chj on c.ROWID = chj.chat_id cross join message m on chj.handle_id = m.handle_id
+from chat c
+         cross join chat_handle_join chj on c.ROWID = chj.chat_id
+         cross join message m on chj.handle_id = m.handle_id
 
+--Work in Progress...
+```
+
+## 8. How Many Unique Phone Numbers Have I Sent Messages To?
+
+```sqlite
+--Join message and handle tables on ROWID
+select count(*) count, h.id handle_id
+from message m
+        cross join handle h on h.ROWID = m.handle_id
+where m.is_from_me = 1
+group by handle_id
+order by count desc
+limit 5;
+
++-----+------------+
+|count|handle_id   |
++-----+------------+
+|976  |+61403xxxxxx|
+|362  |+61425xxxxxx|
+|113  |+61417xxxxxx|
+|57   |+61425xxxxxx|
+|37   |+61403xxxxxx|
++-----+------------+
 ```
 
 ___
