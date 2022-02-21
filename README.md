@@ -38,6 +38,7 @@ ___
 ---All Messages
 SELECT count(*) count
 FROM main.message;
+```
 
 +-----+
 |count|
@@ -45,6 +46,7 @@ FROM main.message;
 |48944|
 +-----+
 
+```sqlite
 ---Sent By Me
 select count(*) count
 from main.message
