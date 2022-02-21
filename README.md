@@ -7,6 +7,7 @@ ___
 
 Apple stores iMessage Data locally in an SQLite Database named 'chat.db'
 ![Finder Window for Messages Database Folder](img/ScreenshotFinderWindow.png)
+
 ```bash
 --> ~ ls -lah /Users/danlsn/Library/Messages
 total 161064
@@ -122,7 +123,9 @@ order by date_time desc;
 |2015     |188  |
 +---------+-----+
 ```
+
 ![iMessages I've Sent By Year](img/MessagesSentPerYear.png)
+
 #### Questions:
 
 1. What happened in 2017?
@@ -217,7 +220,8 @@ from attachment;
 select uti, sum(total_bytes) total_bytes
 from attachment
 group by uti
-order by total_bytes desc limit 10;
+order by total_bytes desc
+limit 10;
 
 +---------------------------------------------+-----------+
 |uti                                          |total_bytes|
@@ -233,6 +237,15 @@ order by total_bytes desc limit 10;
 |com.compuserve.gif                           |34474884   |
 |com.adobe.pdf                                |11116671   |
 +---------------------------------------------+-----------+
+```
+
+## 7. Who have I sent and received the most messages from?
+
+```sqlite
+--Select Messages Grouped by Handle
+select *
+from chat c cross join chat_handle_join chj on c.ROWID = chj.chat_id cross join message m on chj.handle_id = m.handle_id
+
 ```
 
 ___
