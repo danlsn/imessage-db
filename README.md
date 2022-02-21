@@ -257,7 +257,7 @@ from chat c
 --Join message and handle tables on ROWID
 select count(*) count, h.id handle_id
 from message m
-        cross join handle h on h.ROWID = m.handle_id
+         cross join handle h on h.ROWID = m.handle_id
 where m.is_from_me = 1
 group by handle_id
 order by count desc
@@ -272,6 +272,44 @@ limit 5;
 |57   |+61425xxxxxx|
 |37   |+61403xxxxxx|
 +-----+------------+
+```
+
+## 9. How Many Missed Call Messages Have I Received?
+
+```sqlite
+--Select Messages that begin with "You missed a call from..."
+select m.ROWID id, m.text text, m.date datetime
+from message m
+where m.text like 'You missed a call from%'
+limit 1;
+
++--+-------------------------------------------------------------------+------------------+
+|id|text                                                               |datetime          |
++--+-------------------------------------------------------------------+------------------+
+|13|You missed a call from 0409xxxxxx, who did not leave a message.    |658219105684039936|
+|  |This message was provided by Telstra at no charge to you.          |                  |
++--+-------------------------------------------------------------------+------------------+
+
+--How do I miss the most calls from?
+select h.id handle, count(*) count
+from message m
+        cross join handle h on h.ROWID = m.handle_id
+where m.text like 'You missed a call from%'
+  and handle not like 'message2txt'
+group by handle
+order by count desc
+limit 5;
+
++------------+-----+
+|handle      |count|
++------------+-----+
+|+61403xxxxxx|84   |
+|+61409xxxxxx|44   |
+|+61447xxxxxx|15   |
+|+61425xxxxxx|12   |
+|+61420xxxxxx|7    |
++------------+-----+
+
 ```
 
 ___
