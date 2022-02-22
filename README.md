@@ -320,6 +320,7 @@ from (select date(message.date / 1000000000 + strftime("%s", "2001-01-01"), "uni
 order by date_time
 --limit 10;
 ```
+
 | date\_time | count | running\_total |
 | :--- | :--- | :--- |
 | 2015-11-09 | 5 | 5 |
@@ -345,3 +346,44 @@ Success! Now to create the graph.
 I made a much more legible and attractive chart using Metabase.
 
 ![Fancier Metabase Chart](img/Metabase_RunningTotalMessagesChart.png)
+
+## 11. Create a Pie Chart for Sent/Received Messages
+
+```sqlite
+select case "message"."is_from_me"
+           when 1 then "Sent"
+           else "Received"
+           end     "Sent/Received",
+       count(*) as "Count"
+from "message"
+group by "message"."is_from_me";
+```
+
+| Sent/Received | Count |
+| :--- | :--- |
+| Received | 26623 |
+| Sent | 22321 |
+
+![](img/CleanShot 2022-02-22 at 15.44.47@2x.png)
+
+## 12. Obfuscate Phone Numbers In Output for Privacy
+
+> I wanted to do this in SQL without using Python or Bash but I couldn't compile the regex replace extension
+> on my M1 MacBook...
+>
+> So I'm figuring out a workaround
+
+```sqlite
+--Let's use a previous example:
+--How do I miss the most calls from?
+select substr(h.id, -12, 6) || ' xxx xxx' handle,
+       count(*)                           count
+from message m
+        cross join handle h on h.ROWID = m.handle_id
+where m.text like 'You missed a call from%'
+  and handle not like 'message2txt'
+group by handle
+order by count desc
+limit 10;
+
+```
