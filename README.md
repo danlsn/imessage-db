@@ -341,3 +341,7 @@ Success! Now to create the graph.
 > - Big gap in the data from 2016-2018
 > - X-axis is cluttered and difficult to read
 > - The graph isn't very appealing to look at!
+
+I made a much more legible and attractive chart using Metabase.
+
+![Fancier Metabase Chart](img/Metabase_RunningTotalMessagesChart.png)
