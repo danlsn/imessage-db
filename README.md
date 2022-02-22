@@ -166,6 +166,7 @@ select chat_id, count(*) count
 from chat_message_join
 where chat_id = (select ROWID from chat where display_name like 'The Boys');
 ```
+
 | chat\_id | count |
 | :--- | :--- |
 | 3 | 3505 |
@@ -182,6 +183,7 @@ where display_name not like ""
 group by display_name
 order by count desc;
 ```
+
 | display\_name | count |
 | :--- | :--- |
 | The Boys | 3505 |
@@ -197,6 +199,7 @@ order by count desc;
 select sum(total_bytes) total_bytes
 from attachment;
 ```
+
 | total\_bytes |
 | :--- |
 | 9706223350 |
@@ -209,6 +212,7 @@ group by uti
 order by total_bytes desc
 limit 10;
 ```
+
 | uti | total\_bytes |
 | :--- | :--- |
 | com.apple.quicktime-movie | 5112106511 |
@@ -246,6 +250,7 @@ group by handle_id
 order by count desc
 limit 5;
 ```
+
 | count | handle\_id |
 | :--- | :--- |
 | 976 | +61403 xxx xxx |
@@ -279,6 +284,7 @@ group by handle
 order by count desc
 limit 5;
 ```
+
 | handle | count |
 | :--- | :--- |
 | +61403 xxx xxx | 84 |
@@ -286,3 +292,52 @@ limit 5;
 | +61447 xxx xxx | 15 |
 | +61425 xxx xxx | 12 |
 | +61420 xxx xxx | 7 |
+
+## 10. Can you show me a running total line graph of messages sent?
+
+Uhh... yeah?
+
+```sqlite
+--Let's go back to the 'messages grouped by date' query
+select date(message.date / 1000000000 + strftime("%s", "2001-01-01"), "unixepoch", "localtime") date_time,
+       count(ROWID)                                                                             count
+from message
+where message.is_from_me = 1
+group by date_time
+order by count desc
+limit 10;
+
+--SQLite supports window functions!
+select date_time,
+       count,
+       sum(count) over (order by date_time rows between unbounded preceding and current row ) as running_total
+from (select date(message.date / 1000000000 + strftime("%s", "2001-01-01"), "unixepoch", "localtime") date_time,
+             count(ROWID)                                                                             count
+      from message
+      where message.is_from_me = 1
+      group by date_time
+      order by count desc)
+order by date_time
+--limit 10;
+```
+| date\_time | count | running\_total |
+| :--- | :--- | :--- |
+| 2015-11-09 | 5 | 5 |
+| 2015-11-10 | 7 | 12 |
+| 2015-11-11 | 6 | 18 |
+| 2015-11-12 | 2 | 20 |
+| 2015-11-13 | 7 | 27 |
+| 2015-11-14 | 6 | 33 |
+| 2015-11-15 | 5 | 38 |
+| 2015-11-16 | 15 | 53 |
+| 2015-11-17 | 28 | 81 |
+| 2015-11-19 | 1 | 82 |
+
+Success! Now to create the graph.
+
+![Running Total of Messages Sent Line Graph](img/RunningTotalMessages.png)
+
+> Lots of issues with this visualisation...
+> - Big gap in the data from 2016-2018
+> - X-axis is cluttered and difficult to read
+> - The graph isn't very appealing to look at!
